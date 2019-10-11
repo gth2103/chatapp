@@ -1,0 +1,3 @@
+chatappvenv/
+ __pycache__/
+*.pyc

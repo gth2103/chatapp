@@ -1,0 +1,42 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+    <ul id="messages"></ul>
+    <input type="text" id="myMessage">
+    <button id="sendButton">Send</button>
+
+
+    <script type="text/javascript">
+      $(document).ready(function(){
+
+        var socket = io.connect('http://localhost:5000/')
+        socket.on('connect', function(){              
+          console.log("User has connected")
+        })
+
+        
+
+      socket.on('message', function(msg){
+
+        $("#messages").append("<li>"+msg+"</li>")
+      })
+
+
+      $("#sendButton").on('click', function(){  
+        var myMessage = $("#myMessage").val()  
+        socket.send(myMessage)  
+      })
+
+
+      })
+    </script>
+
+{% endblock %}
+
+ 
+
+
+
+
+

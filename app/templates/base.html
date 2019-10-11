@@ -1,0 +1,42 @@
+<html>
+  <head>
+    <title>IMDB 2</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="http://netdna.bootstrapcdn.com/bootstrap/3.0.0/css/bootstrap.min.css" rel="stylesheet" media="screen">
+    
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/2.1.1/socket.io.dev.js"></script>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+    
+
+
+    <style type="text/css">
+      .container {
+        max-width: 500px;
+        padding-top: 100px;
+      }
+      h2 {color: red;}
+    </style>
+  </head>
+<body>
+
+
+<div>
+    Microblog:
+    <a href="{{ url_for('index') }}">Home</a>
+    {% if current_user.is_anonymous %}
+        <a href="{{ url_for('login') }}">Login</a>
+    {% else %}
+        Hi, {{ current_user.username }}!
+        <a href="{{ url_for('logout') }}">Logout</a>
+    {% endif %}
+    <BR>
+    CONTENT:<BR>
+    {% block content %}{% endblock %}
+</div>  
+
+</body>
+
+
+</html>
+
