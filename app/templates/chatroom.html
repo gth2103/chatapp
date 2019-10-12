@@ -2,32 +2,113 @@
 
 {% block content %}
 
-    <ul id="messages"></ul>
-    <input type="text" id="myMessage">
-    <button id="sendButton">Send</button>
-
+  <div id="chat-box" col="row">
+    <div class="col">
+      <div class="row">
+        <!-- SIDEBAR -->
+        <div class="col-3 bg-light py-2">
+          <nav id="sidebar">
+            <h5 class="m-3">Chat Rooms</h5>
+            {% for room in rooms %}
+            <p class="room bg-white text-dark text-center py-2">
+              {{room|title}}
+            </p>
+            {% endfor %}
+          </nav>
+        </div>
+        <!-- MAIN -->
+        <div id="main" class="col-9">
+          <!-- MESSAGES -->
+          <div id="message-box">
+            <div class="py-4 mb-5 px-3" id="messages">
+                
+            </div>
+          </div>
+          <!-- INPUT -->
+          <div id="input-box" class="position-absolute">
+            <input type="text" id="myMessage" class="p-2 m-2">
+            <!--<input type="file" name="pic" accept="image/*" id="myImage">-->
+            <button id="sendButton" class="btn btn-outline-dark mx-2 mb-1">Send</button>
+          </div>
+        </div>
+    </div>
+  </div>
 
     <script type="text/javascript">
+
+      var username = "{{current_user.username|safe}}"
+
+      var rooms = {{rooms|safe}}
+
+      var current_room = $('.room').first().text()
+
+      var leave_room = function(room, socket){
+        socket.emit('leave', {'user' : username, 'room': room})
+      }
+
+      var join_room = function(room, socket){
+        current_room = room
+        socket.emit('join', {'user' : username, 'room': room})
+        $('#messages').empty() 
+        console.log($('#messages').height())
+      }
+
+      var print_sys_msg = function(sys_msg){
+        var list_item = '<p><b>' + sys_msg + '</b></p>'
+        $('#messages').append(list_item)
+      } 
+
       $(document).ready(function(){
-
-        var socket = io.connect('http://localhost:5000/')
-        socket.on('connect', function(){              
-          console.log("User has connected")
-        })
-
         
 
-      socket.on('message', function(msg){
+        var socket = io.connect('http://127.0.0.1:5000/')
+        socket.on('connect', function(){              
+          console.log(username + " has connected")
+          socket.send(username + " has connected")
+        })
 
-        $("#messages").append("<li>"+msg+"</li>")
+        join_room(current_room, socket)
+
+      // Display incoming messages
+
+      socket.on('message', function(data){
+        if (data.msg !== undefined){
+        list_item = '<p><b><span class="user">' + data.user + '</span></b>:&nbsp;&nbsp;&nbsp;' + data.msg + '<span class="timestamp float-right"><small>' + data.time + '</small></span></p>'
+        console.log("message recieved: " + data.msg + " from: " + data.user)
+        $('#messages').append(list_item);
+        $('#messages').scrollTop($('#messages').height())
+      }
       })
 
+      $("#myMessage").on('keyup', function(){
+        if(event.ketCode === 13){
+          $("#sendButton").click()
+        }
+      })
 
       $("#sendButton").on('click', function(){  
-        var myMessage = $("#myMessage").val()  
-        socket.send(myMessage)  
+        var myMessage = $("#myMessage").val()
+        //var myImage = $("#myImage").prop('files')[0];
+        //console.log(myImage)
+        socket.send({'msg': myMessage, 'user': username, 'room': current_room})
+        //socket.send(myMessage)  
+        $("#myMessage").val("")
       })
 
+
+      $(".room").on('click', function(){
+
+        var new_room = $(this).text()
+
+        if(new_room === current_room){
+          var msg = 'You are already in this room.' 
+          print_sys_msg(msg)
+        }
+        else {
+          leave_room(current_room, socket)
+          join_room(new_room, socket)
+        }
+      })
 
       })
     </script>
