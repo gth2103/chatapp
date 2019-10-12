@@ -9,10 +9,12 @@ from app.forms import LoginForm, RegistrationForm
 
 from flask_login import logout_user
 
+ROOMS = ["general", "lecture", "homework", "exams", "debug"]
 
 @app.route("/")
-def index():    
-    return render_template('chatroom.html')
+def index(): 
+    global current_user   
+    return render_template('chatroom.html', current_user = current_user, rooms = ROOMS)
 
 @app.route('/register', methods=['GET', 'POST'])
 def register():
@@ -57,7 +59,6 @@ def login():
         return redirect(url_for('index'))
     else:
         return render_template('login.html', title='Sign In', form=form)
-
 
 
 @app.route('/logout')
